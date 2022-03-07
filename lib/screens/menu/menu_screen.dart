@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodme_backend/blocs/product/product_bloc.dart';
 import 'package:foodme_backend/config/responsive.dart';
 
 import 'package:foodme_backend/widgets/widgets.dart';
 
+import '../../blocs/category/category_bloc.dart';
 import '../../models/model.dart';
 
 class MenuScreen extends StatelessWidget {
@@ -77,8 +80,14 @@ class MenuScreen extends StatelessWidget {
                         minHeight: 75.0,
                       ),
                       color: Theme.of(context).primaryColor,
-                      child: const Text(
-                        'Banners Aqui',
+                      child: Center(
+                        child: Text(
+                          'Banners Aqui',
+                          style:
+                              Theme.of(context).textTheme.headline5!.copyWith(
+                                    color: Colors.white,
+                                  ),
+                        ),
                       ),
                     ),
                   ],
@@ -95,7 +104,10 @@ class MenuScreen extends StatelessWidget {
                       right: 20.0,
                     ),
                     color: Theme.of(context).backgroundColor,
-                    child: const Center(child: Text('Banners Aqui')),
+                    child: const Center(
+                        child: Text(
+                      'Banners Aqui',
+                    )),
                   ),
                 )
               : const SizedBox(),
@@ -115,12 +127,42 @@ class MenuScreen extends StatelessWidget {
             'Categorias',
             style: Theme.of(context).textTheme.headline4,
           ),
-          const SizedBox(height: 20.0),
-          ...Category.categories.map(
-            (category) {
-              return CategoryListTile(category: category);
+          BlocBuilder<CategoryBloc, CategoryState>(
+            builder: (context, state) {
+              if (state is CategoryLoading) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    color: Theme.of(context).primaryColor,
+                  ),
+                );
+              }
+              if (state is CategoryLoaded) {
+                return ReorderableListView(
+                    shrinkWrap: true,
+                    children: [
+                      for (int index = 0;
+                          index < state.categories.length;
+                          index++)
+                        CategoryListTile(
+                          category: state.categories[index],
+                          onTap: () {
+                            // Click to select the category
+                            context
+                                .read<CategoryBloc>()
+                                .add(SelectCategory(state.categories[index]));
+                          },
+                          key: ValueKey(state.categories[index].id),
+                        ),
+                    ],
+                    onReorder: (oldIndex, newIndex) {
+                      context.read<CategoryBloc>().add(SortCategories(
+                          oldIndex: oldIndex, newIndex: newIndex));
+                    });
+              } else {
+                return const Text('Ha ocurrido un error');
+              }
             },
-          ).toList()
+          ),
         ],
       ),
     );
@@ -138,13 +180,46 @@ class MenuScreen extends StatelessWidget {
             style: Theme.of(context).textTheme.headline4,
           ),
           const SizedBox(height: 20.0),
-          ...Product.products.map(
-            (product) {
-              return ProductListTile(
-                product: product,
-              );
+          BlocBuilder<ProductBloc, ProductState>(
+            builder: (context, state) {
+              if (state is ProductLoading) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    color: Theme.of(context).primaryColor,
+                  ),
+                );
+              }
+              if (state is ProductLoaded) {
+                return ReorderableListView(
+                    shrinkWrap: true,
+                    children: [
+                      for (int index = 0;
+                          index < state.products.length;
+                          index++)
+                        ProductListTile(
+                          product: state.products[index],
+                          onTap: () {
+                            // Click to select the category
+                          },
+                          key: ValueKey(state.products[index].id),
+                        ),
+                    ],
+                    onReorder: (oldIndex, newIndex) {
+                      context.read<ProductBloc>().add(
+                          SortProducts(oldIndex: oldIndex, newIndex: newIndex));
+                    });
+              } else {
+                return const Text('Ha ocurrido un error');
+              }
             },
-          ).toList()
+          ),
+          // ...Product.products.map(
+          //   (product) {
+          //     return ProductListTile(
+          //       product: product,
+          //     );
+          //   },
+          // ).toList()
         ],
       ),
     );
