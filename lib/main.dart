@@ -1,15 +1,21 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:foodme_backend/blocs/category/category_bloc.dart';
 import 'package:foodme_backend/blocs/product/product_bloc.dart';
+import 'package:foodme_backend/blocs/settings/settings_bloc.dart';
 import 'package:foodme_backend/config/theme.dart';
-import 'package:foodme_backend/models/category_model.dart';
+import 'package:foodme_backend/firebase_options.dart';
+
 import 'package:foodme_backend/models/model.dart';
+import 'package:foodme_backend/screens/screens.dart';
 
-import 'screens/menu/menu_screen.dart';
-
-void main() => runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -27,6 +33,15 @@ class MyApp extends StatelessWidget {
                 categoryBloc: BlocProvider.of<CategoryBloc>(context))
               ..add(LoadProducts(products: Product.products)),
           ),
+          BlocProvider(
+            create: (context) => SettingsBloc()
+              ..add(
+                LoadSettings(
+                  restaurant:
+                      Restaurant(openingHours: OpeningHours.openingHoursList),
+                ),
+              ),
+          ),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
@@ -36,7 +51,7 @@ class MyApp extends StatelessWidget {
           routes: {
             '/menu': (context) => const MenuScreen(),
             // '/dash': (context) => const DashboardScreen(),
-            // '/opening-hours': (context) => const OpeningHoursScreen(),
+            '/settings': (context) => const SettingsScreen(),
           },
         ));
   }

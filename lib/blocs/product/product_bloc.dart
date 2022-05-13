@@ -41,12 +41,12 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     emit(ProductLoaded(products: event.products));
   }
 
-  void _onAddProduct(
+  void _onAddProduct(   
     AddProduct event,
     Emitter<ProductState> emit,
-  ) {
+  ) async {
     if (state is ProductLoaded) {
-      print('Adding Product');
+      print('Agregando Producto');
       emit(
         ProductLoaded(
           products: List.from((state as ProductLoaded).products)

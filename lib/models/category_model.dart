@@ -31,9 +31,19 @@ class Category extends Equatable {
     );
   }
 
+  Map<String, dynamic> toDocument() {
+    return {
+      'id': id,
+      'name': name,
+      'imageUrl': imageUrl,
+      'description': description,
+      'index': index,
+    };
+  }
+
   factory Category.fromSnapshot(Map<String, dynamic> snap) {
     return Category(
-      id: snap['id'],
+      id: snap['id'].toString(),
       name: snap['name'],
       imageUrl: snap['imageUrl'],
       description: snap['description'],
